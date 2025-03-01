@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽獎系統</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { max-width: 500px; margin: auto; }
+        button { margin: 5px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>獎勵抽獎系統</h2>
+        <h3>代幣數量: <span id="tokens">0</span></h3>
+        <button onclick="addToken()">增加代幣</button>
+        <button onclick="drawReward()">抽獎</button>
+        <h3>抽獎結果:</h3>
+        <p id="result">尚未抽獎</p>
+        <h3>獎勵管理</h3>
+        <input type="text" id="rewardInput" placeholder="輸入獎勵內容">
+        <button onclick="addReward()">新增獎勵</button>
+        <ul id="rewardList"></ul>
+        <h3>抽獎歷史</h3>
+        <ul id="historyList"></ul>
+    </div>
+
+    <script>
+        let tokens = parseInt(localStorage.getItem("tokens")) || 0;
+        let rewards = JSON.parse(localStorage.getItem("rewards")) || [];
+        let history = JSON.parse(localStorage.getItem("history")) || [];
+
+        document.getElementById("tokens").innerText = tokens;
+        updateRewardList();
+        updateHistoryList();
+
+        function addToken() {
+            tokens++;
+            localStorage.setItem("tokens", tokens);
+            document.getElementById("tokens").innerText = tokens;
+        }
+
+        function addReward() {
+            let rewardInput = document.getElementById("rewardInput").value;
+            if (rewardInput) {
+                rewards.push(rewardInput);
+                localStorage.setItem("rewards", JSON.stringify(rewards));
+                document.getElementById("rewardInput").value = "";
+                updateRewardList();
+            }
+        }
+
+        function updateRewardList() {
+            let list = document.getElementById("rewardList");
+            list.innerHTML = "";
+            rewards.forEach((reward, index) => {
+                let li = document.createElement("li");
+                li.textContent = `#${index + 1}: ${reward}`;
+                list.appendChild(li);
+            });
+        }
+
+        function drawReward() {
+            if (tokens > 0 && rewards.length > 0) {
+                tokens--;
+                localStorage.setItem("tokens", tokens);
+                document.getElementById("tokens").innerText = tokens;
+                let index = Math.floor(Math.random() * rewards.length);
+                let reward = rewards[index];
+                document.getElementById("result").innerText = `#${index + 1}: ${reward}`;
+                history.push(`#${index + 1}: ${reward}`);
+                localStorage.setItem("history", JSON.stringify(history));
+                updateHistoryList();
+            } else {
+                alert("代幣不足或沒有獎勵！");
+            }
+        }
+
+        function updateHistoryList() {
+            let list = document.getElementById("historyList");
+            list.innerHTML = "";
+            history.forEach(entry => {
+                let li = document.createElement("li");
+                li.textContent = entry;
+                list.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
